@@ -1,6 +1,6 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
+# and in the NixOS manual (accessible by running â€˜nixos-helpâ€™).
 
 { config, pkgs, ... }:
 
@@ -14,14 +14,16 @@
     "openssl-1.1.1u"
   ];
 
-  nixpkgs.config.allowUnfreePredicate = (pkg: builtins.elem (builtins.parseDrvName pkg.name).name [ "steam" ]);
-
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "nixos"; # Define your hostname.
-  #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.hostName = "ficsit"; # Define your hostname.
+  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+
+  # Configure network proxy if necessary
+  # networking.proxy.default = "http://user:password@proxy:port/";
+  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -31,6 +33,7 @@
     enable = true;
     package = pkgs.usbmuxd2;
   };
+
 
   # Set your time zone.
   time.timeZone = "America/Chicago";
@@ -67,14 +70,22 @@
     driSupport32Bit = true;
   };
 
-  # Enable the Budgie Desktop environment.
-  services.xserver.displayManager.lightdm.enable = true;
-  services.xserver.desktopManager.budgie.enable = true;
+  # Enable the GNOME Desktop Environment.
+  services.xserver.displayManager.gdm.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11
   services.xserver = {
     layout = "us";
     xkbVariant = "";
+  };
+
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    extraPortals = with pkgs; [
+#      xdg-desktop-portal-gtk
+    ];
   };
 
   # Enable CUPS to print documents.
@@ -100,13 +111,13 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # Define a user account. Don't forget to set a password with â€˜passwdâ€™.
   users.users.james = {
     isNormalUser = true;
     description = "James Ireland";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
-      firefox
+    #  firefox
     #  thunderbird
     ];
   };
@@ -123,12 +134,15 @@
     }
   ];
 
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  #  wget
     alacritty
     autojump
     bash-completion
@@ -137,11 +151,10 @@
     btop
     clang
     curl
+    gnome.dconf-editor
     dig
     discord
-    dracula-theme
     dunst
-    dwm
     evolution
     filezilla
     firefox-devedition
@@ -149,74 +162,68 @@
     font-awesome
     freetype
     gcc
-    gdk-pixbuf
-    gdk-pixbuf-xlib
     geoip
     gimp
     git
     github-desktop
     glibc
-    gnome-icon-theme
+    gnome.gnome-tweaks
+    gnomeExtensions.arcmenu
+    gnomeExtensions.blur-my-shell
+    gnomeExtensions.dash-to-dock
+    gnomeExtensions.openweather
+    gnomeExtensions.vitals
     gnumake
     hplip
     imagemagick
     inetutils
-    lf
-    libappindicator-gtk3
-    libimobiledevice
+    kitty
+    libappindicator
     libreoffice-fresh
     librewolf
     lm_sensors
     lsd
     lutris
     lynx
+    mesa
     meson
-    mpv
-    mutt-wizard
     neofetch
     neovim
     nerd-font-patcher
-    nerdfonts
-    newsboat
+#    nerdfonts
     ninja
-    nordic
     papirus-icon-theme
     pipx
     pkgconfig
-    poppler
     powerline
     python3Full
-    snixembed
+    python-launcher
     stdenv
     starship
     steam
     steam-run
     sublime4
     tldr
-    tsduck
     udev
     unzip
     usbmuxd2
     vkd3d
     vkd3d-proton
     vscode
+    vulkan-tools
     w3m
+    winetricks
+    wineWowPackages.unstableFull
     wget
-    xorg.libX11
-    xorg.libX11.dev
-    xorg.libxcb
-    xorg.libXft
-    xorg.libXinerama
-    xorg.xinput
-    xorg.xinit
-    (lutris.override {
-      extraPkgs = pkgs: [
-        wineWowPackages.stable
-        winetricks
-      ];
-    })
     zathura
     zip
+    (lutris.override {
+       extraPkgs = pkgs: [
+         # List package dependencies here
+          wineWowPackages.unstableFull
+          winetricks
+       ];
+    })
   ];
 
   programs.steam = {
@@ -224,12 +231,16 @@
     remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
   };
- 
+
   #nixpkgs.overlays = [
   #  (final: prev: {
   #    dwm = prev.dwm.overrideAttrs (old: { src = /home/james/.github/dwm ;});
   #  })
   #];
+
+  fonts.fonts = with pkgs; [
+    (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -239,34 +250,21 @@
   #   enableSSHSupport = true;
   # };
 
-  # Fonts
-  fonts = {
-    packages = with pkgs; [
-      noto-fonts
-      noto-fonts-emoji
-      font-awesome
-      (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
-    ];
-    fontconfig = {
-      enable = true;
-      defaultFonts = {
-        monospace = [ "JetBrainsMono Nerd Font Mono Regular" ];
-        serif = [ "Noto Serif" ];
-        sansSerif = [ "Noto Sans" ];
-      };
-    };
-  };
-
   # List services that you want to enable:
-  # DBus
+
+  # Enable the OpenSSH daemon.
+  services.openssh.enable = true;
+  services.acpid.enable = true;
   services.dbus.enable = true;
   services.locate = {
     enable = true;
   };
 
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
-
+  systemd = {
+    extraConfig = ''
+      DefaultTimeoutStopSec = 10s
+    '';
+  };
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
@@ -275,11 +273,12 @@
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
+  # on your system were taken. Itâ€˜s perfectly fine and recommended to leave
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "unstable"; # Did you read the comment?
+  # system.stateVersion = "23.05"; # Did you read the comment?
+  system.stateVersion = "unstable";
   system.autoUpgrade.enable = true;
   system.autoUpgrade.allowReboot = false;
 }
