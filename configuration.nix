@@ -174,6 +174,7 @@
     gnomeExtensions.openweather
     gnomeExtensions.vitals
     gnumake
+    heroic
     hplip
     imagemagick
     inetutils
@@ -183,7 +184,6 @@
     librewolf
     lm_sensors
     lsd
-    lutris
     lynx
     mesa
     meson
@@ -212,18 +212,9 @@
     vscode
     vulkan-tools
     w3m
-    winetricks
-    wineWowPackages.unstableFull
     wget
     zathura
     zip
-    (lutris.override {
-       extraPkgs = pkgs: [
-         # List package dependencies here
-          wineWowPackages.unstableFull
-          winetricks
-       ];
-    })
   ];
 
   programs.steam = {
