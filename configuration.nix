@@ -155,6 +155,7 @@
     curl
     gnome.dconf-editor
     dig
+    directx-headers
     discord
     dunst
     evolution
@@ -176,6 +177,8 @@
     gnomeExtensions.openweather
     gnomeExtensions.vitals
     gnumake
+    gtk_engines
+    gtk-engine-murrine
     heroic
     hplip
     imagemagick
@@ -198,6 +201,7 @@
     pipx
     pkgconfig
     powerline
+    powerline-fonts
     python3Full
     python-launcher
     stdenv
